@@ -1,1 +1,13 @@
+Detección de Fraude con Selección Iterativa (Enfoque: Sklearn)
+
+Escenario: 
+Trabajas en publicidad digital y necesitas un proceso que seleccione las mejores características de los clics (IP, dispositivo, red) antes de clasificar si son "Genuinos" o "Fraude".
+
+Tu Misión: 
+Desarrolla una función llamada detectar_clics_fraudulentos(df, target_col, n_features) que realice lo siguiente:
+1.	Escalado Disperso: Transforma las variables predictoras (X) utilizando MaxAbsScaler para preservar la estructura de los datos con muchos ceros (esta técnica es inédita en el archivo CSV).
+2.	Selección RFE: Utiliza la Eliminación Recursiva de Características (RFE) con una LogisticRegression para seleccionar las n_features más importantes.
+3.	Modelo Bayesiano: Entrena un modelo GaussianNB (Naive Bayes Gaussiano) utilizando únicamente las características seleccionadas.
+4.	Validación Robusta: Evalúa el modelo usando RepeatedKFold con 5 particiones y 2 repeticiones.
+5.	Resultado: La función debe retornar el promedio del balanced_accuracy_score obtenido en las repeticiones (métrica no registrada en el CSV).
 
