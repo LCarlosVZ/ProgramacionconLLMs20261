@@ -1,1 +1,13 @@
+Auditoría de Consumo Energético (Enfoque: Pandas)
+
+Escenario: 
+Para la empresa de gestión energética, debes auditar las lecturas de los sensores en edificios inteligentes para detectar patrones de consumo fuera de lo común.
+
+Tu Misión: 
+Desarrolla una función llamada auditar_consumo_edificios(df) que realice lo siguiente:
+1.	Ingeniería Temporal: Utiliza la columna dia_semana (0=lunes, 6=domingo) y aplica np.where para crear una columna binaria es_fin_de_semana (1 si es 5 o 6, y 0 en caso contrario).
+2.	Normalización de Ocupación: Crea una columna llamada consumo_por_persona dividiendo el consumo_kWh entre la ocupacion del edificio.
+3.	Filtrado de Eficiencia: Filtra el DataFrame para conservar solo los registros donde la eficiencia_certificada sea "A" o "B".
+4.	Cálculo de Desviación: Calcula la diferencia entre el consumo_por_persona de cada fila y el promedio global de esa misma columna.
+5.	Resultado: La función debe retornar el DataFrame filtrado con las nuevas columnas incluidas.
 
