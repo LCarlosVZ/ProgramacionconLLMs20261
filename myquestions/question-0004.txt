@@ -1,1 +1,13 @@
+Predicción de Resiliencia Hidráulica (Enfoque: Sklearn)
+
+Escenario: 
+En la empresa de servicios públicos, debes predecir fallos en la red de agua basándote en sensores IoT que presentan una alta correlación temporal.
+
+Tu Misión: 
+Desarrolla una función llamada analizar_resiliencia_hidraulica(X, y) que realice lo siguiente:
+1.	Normalización por Filas: Transforma la matriz de características (X) utilizando Normalizer con la norma L2 (escala cada fila de forma independiente, a diferencia de los escaladores por columnas del CSV).
+2.	Ensamble de Votación: Instancia un VotingClassifier que combine un LogisticRegression y un KNeighborsClassifier (con 3 vecinos) usando voting='hard'.
+3.	Validación Temporal: Utiliza TimeSeriesSplit con 4 particiones para asegurar que el modelo se evalúe respetando el orden cronológico de los datos.
+4.	Métrica de Correlación: Calcula el promedio del Coeficiente de Correlación de Matthews (matthews_corrcoef) en las particiones.
+5.	Resultado: La función debe retornar el promedio del score MCC obtenido (esta métrica es mucho más robusta para clases desbalanceadas que las del archivo CSV).
 
