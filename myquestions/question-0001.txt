@@ -1,1 +1,13 @@
+Análisis de Umbrales Geotécnicos (Enfoque: Pandas)
+
+Escenario: 
+En la consultora de geotecnia, necesitas procesar los datos de los sensores de las laderas para identificar condiciones críticas antes de enviarlos a un modelo de predicción.
+
+Tu Misión: 
+Desarrolla una función llamada analizar_umbrales_geotecnicos(df, umbral_nulos) que realice lo siguiente:
+1.	Limpieza Dinámica: Identifica y elimina las columnas que tengan un porcentaje de valores nulos superior al parámetro umbral_nulos (ej. 0.2 para el 20%).
+2.	Imputación de Tendencia: Para las columnas numéricas restantes, rellena los nulos utilizando la moda de cada columna (el valor más frecuente).
+3.	Codificación de Seguridad: Crea una nueva columna llamada estabilidad_num. Usa el método .map() de Pandas para convertir "Inestable" en 0 y "Estable" en 1.
+4.	Resumen Estadístico: Agrupa el DataFrame por estabilidad_num y calcula el valor máximo de pluviosidad_reciente y la media de presion_de_poros para cada grupo.
+5.	Resultado: La función debe retornar el DataFrame agrupado resultante.
 
