@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 def generar_casos_geotecnicos(n_muestras=100):
-    rng = np.random.default_rng(42)
+    rng = np.random.default_rng()
     
     data = {
         'sensor_id': rng.integers(1000, 2000, n_muestras),
@@ -25,36 +25,77 @@ def generar_casos_geotecnicos(n_muestras=100):
 
 def analizar_umbrales_geotecnicos(df, umbral_nulos):
     
-    # 1. Limpieza Dinámica
-    porcentaje_nulos = df.isnull().mean()
-    columnas_a_eliminar = porcentaje_nulos[porcentaje_nulos > umbral_nulos].index
-    df_limpio = df.drop(columns=columnas_a_eliminar)
+    # Trabajar sobre copia
+    df_limpio = df.copy()
     
-    # 2. Imputación de Tendencia (moda en columnas numéricas)
+    # 1. Eliminación de columnas con muchos nulos
+    porcentaje_nulos = df_limpio.isnull().mean()
+    columnas_a_eliminar = porcentaje_nulos[porcentaje_nulos > umbral_nulos].index
+    df_limpio = df_limpio.drop(columns=columnas_a_eliminar)
+    
+    # 2. Imputación con moda
     columnas_numericas = df_limpio.select_dtypes(include=np.number).columns
     
     for col in columnas_numericas:
-        moda = df_limpio[col].mode()[0]
-        df_limpio[col] = df_limpio[col].fillna(moda)
+        if df_limpio[col].isnull().any():
+            moda = df_limpio[col].mode()[0]
+            df_limpio[col] = df_limpio[col].fillna(moda)
     
-    # 3. Codificación de Seguridad
+    # 3. Codificación
     df_limpio['estabilidad_num'] = df_limpio['estabilidad'].map({
         'Inestable': 0,
         'Estable': 1
     })
     
-    # 4. Resumen Estadístico
+    # 4. Agrupación
     df_agrupado = df_limpio.groupby('estabilidad_num').agg({
         'pluviosidad_reciente': 'max',
         'presion_de_poros': 'mean'
     })
     
-    # 5. Resultado
     return df_agrupado
 
 
-# Ejemplo de uso
-#df_prueba = generar_casos_geotecnicos(100)
-#resultado = analizar_umbrales_geotecnicos(df_prueba, 0.2)
-
-#print(resultado)
+# FUNCIÓN GENERADORA 
+def generar_caso_de_uso_analisis_geotecnico():
+    """
+    Genera input y output esperado (ground truth independiente)
+    """
+    
+    df = generar_casos_geotecnicos(np.random.randint(50, 150))
+    umbral_nulos = np.random.uniform(0.1, 0.4)
+    
+    # INPUT
+    input_data = {
+        'df': df.copy(),
+        'umbral_nulos': umbral_nulos
+    }
+    
+    df_limpio = df.copy()
+    
+    # 1. Eliminación de columnas
+    porcentaje_nulos = df_limpio.isnull().mean()
+    columnas_a_eliminar = porcentaje_nulos[porcentaje_nulos > umbral_nulos].index
+    df_limpio = df_limpio.drop(columns=columnas_a_eliminar)
+    
+    # 2. Imputación
+    columnas_numericas = df_limpio.select_dtypes(include=np.number).columns
+    
+    for col in columnas_numericas:
+        if df_limpio[col].isnull().any():
+            moda = df_limpio[col].mode()[0]
+            df_limpio[col] = df_limpio[col].fillna(moda)
+    
+    # 3. Codificación
+    df_limpio['estabilidad_num'] = df_limpio['estabilidad'].map({
+        'Inestable': 0,
+        'Estable': 1
+    })
+    
+    # 4. Agrupación
+    output_data = df_limpio.groupby('estabilidad_num').agg({
+        'pluviosidad_reciente': 'max',
+        'presion_de_poros': 'mean'
+    })
+    
+    return input_data, output_data
