@@ -54,7 +54,7 @@ def analizar_umbrales_geotecnicos(df, umbral_nulos):
 
 
 # Ejemplo de uso
-df_prueba = generar_casos_geotecnicos(100)
-resultado = analizar_umbrales_geotecnicos(df_prueba, 0.2)
+#df_prueba = generar_casos_geotecnicos(100)
+#resultado = analizar_umbrales_geotecnicos(df_prueba, 0.2)
 
-print(resultado)
+#print(resultado)
