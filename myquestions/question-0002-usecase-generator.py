@@ -40,7 +40,7 @@ def auditar_consumo_edificios(df):
 
 
 # Ejemplo de uso
-df_prueba = generar_datos_auditoria(50)
-resultado = auditar_consumo_edificios(df_prueba)
+# df_prueba = generar_datos_auditoria(50)
+# resultado = auditar_consumo_edificios(df_prueba)
 
-print(resultado.head())
+# print(resultado.head())
