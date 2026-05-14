@@ -1,0 +1,5 @@
+Diagnóstico para answer-211.py (Pregunta 0211):
+La solución es técnicamente correcta según los requerimientos de la misión. 
+El error Value mismatch: None != 0 ocurre porque el generador de casos de uso de Valentina Garro (question-0003-usecase-generator.py) 
+devuelve None como valor esperado en su línea 20 (return { ... }, None). 
+Mi función devuelve la predicción real calculada por el modelo KNN, lo cual causa la discrepancia con el valor nulo del generador.
