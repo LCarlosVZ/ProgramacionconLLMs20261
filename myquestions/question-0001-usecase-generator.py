@@ -2,9 +2,65 @@ import pandas as pd
 import numpy as np
 from pandas.testing import assert_frame_equal
 
+# ---------------------------------------------------------
+# 1. GENERADOR DE CASO DE USO (GROUND TRUTH) - ¡AHORA PRIMERO!
+# ---------------------------------------------------------
+def generar_caso_de_uso_analisis_geotecnico():
+    """
+    Esta función queda en la primera posición del namespace del módulo
+    para que gen_funcs[0]() del evaluador la ejecute correctamente.
+    """
+    df = generar_casos_geotecnicos(np.random.randint(50, 150))
+    umbral_nulos = np.random.uniform(0.1, 0.4)
+    
+    input_data = {
+        'df': df.copy(),
+        'umbral_nulos': umbral_nulos
+    }
+    
+    # -------- GROUND TRUTH --------
+    df_limpio = df.copy()
+    
+    porcentaje_nulos = df_limpio.isnull().mean()
+    columnas_a_eliminar = porcentaje_nulos[porcentaje_nulos > umbral_nulos].index
+    df_limpio = df_limpio.drop(columns=columnas_a_eliminar)
+    
+    columnas_numericas = df_limpio.select_dtypes(include=np.number).columns
+    
+    for col in columnas_numericas:
+        if df_limpio[col].isnull().any():
+            if df_limpio[col].dropna().empty:
+                continue
+            moda = df_limpio[col].mode()[0]
+            df_limpio[col] = df_limpio[col].fillna(moda)
+    
+    if 'estabilidad' not in df_limpio.columns:
+        raise ValueError("La columna 'estabilidad' fue eliminada.")
+    
+    df_limpio['estabilidad_num'] = df_limpio['estabilidad'].map({
+        'Inestable': 0,
+        'Estable': 1
+    })
+    
+    columnas_agg = {}
+
+    if 'pluviosidad_reciente' in df_limpio.columns:
+        columnas_agg['pluviosidad_reciente'] = 'max'
+
+    if 'presion_de_poros' in df_limpio.columns:
+        columnas_agg['presion_de_poros'] = 'mean'
+
+    if not columnas_agg:
+        raise ValueError("No hay columnas para agrupar.")
+    
+    output_data = df_limpio.groupby('estabilidad_num').agg(columnas_agg)
+    output_data = output_data.sort_index().sort_index(axis=1)
+    
+    return input_data, output_data
+
 
 # ---------------------------------------------------------
-# 1. GENERADOR DE DATOS ALEATORIOS
+# 2. GENERADOR DE DATOS ALEATORIOS
 # ---------------------------------------------------------
 def generar_casos_geotecnicos(n_muestras=100):
     rng = np.random.default_rng()
@@ -29,10 +85,9 @@ def generar_casos_geotecnicos(n_muestras=100):
 
 
 # ---------------------------------------------------------
-# 2. FUNCIÓN PRINCIPAL
+# 3. FUNCIÓN PRINCIPAL (SOLUCIÓN)
 # ---------------------------------------------------------
 def analizar_umbrales_geotecnicos(df, umbral_nulos):
-    
     df_limpio = df.copy()
     
     # 1. Eliminación de columnas con muchos nulos
@@ -80,81 +135,19 @@ def analizar_umbrales_geotecnicos(df, umbral_nulos):
 
 
 # ---------------------------------------------------------
-# 3. FUNCIÓN GENERADORA (GROUND TRUTH)
-# ---------------------------------------------------------
-def generar_caso_de_uso_analisis_geotecnico():
-    
-    df = generar_casos_geotecnicos(np.random.randint(50, 150))
-    umbral_nulos = np.random.uniform(0.1, 0.4)
-    
-    input_data = {
-        'df': df.copy(),
-        'umbral_nulos': umbral_nulos
-    }
-    
-    # -------- GROUND TRUTH --------
-    df_limpio = df.copy()
-    
-    porcentaje_nulos = df_limpio.isnull().mean()
-    columnas_a_eliminar = porcentaje_nulos[porcentaje_nulos > umbral_nulos].index
-    df_limpio = df_limpio.drop(columns=columnas_a_eliminar)
-    
-    columnas_numericas = df_limpio.select_dtypes(include=np.number).columns
-    
-    for col in columnas_numericas:
-        if df_limpio[col].isnull().any():
-            if df_limpio[col].dropna().empty:
-                continue
-            moda = df_limpio[col].mode()[0]
-            df_limpio[col] = df_limpio[col].fillna(moda)
-    
-    if 'estabilidad' not in df_limpio.columns:
-        raise ValueError("La columna 'estabilidad' fue eliminada.")
-    
-    df_limpio['estabilidad_num'] = df_limpio['estabilidad'].map({
-        'Inestable': 0,
-        'Estable': 1
-    })
-    
-    columnas_agg = {}
-
-    if 'pluviosidad_reciente' in df_limpio.columns:
-        columnas_agg['pluviosidad_reciente'] = 'max'
-
-    if 'presion_de_poros' in df_limpio.columns:
-        columnas_agg['presion_de_poros'] = 'mean'
-
-    if not columnas_agg:
-        raise ValueError("No hay columnas para agrupar.")
-    
-    output_data = df_limpio.groupby('estabilidad_num').agg(columnas_agg)
-    
-    output_data = output_data.sort_index().sort_index(axis=1)
-    
-    return input_data, output_data
-
-
-# ---------------------------------------------------------
-# 4. EJEMPLO DE USO + VALIDACIÓN ROBUSTA
+# 4. PRUEBA DE INTEGRACIÓN LOCAL
 # ---------------------------------------------------------
 if __name__ == "__main__":
-    
     entrada, salida_esperada = generar_caso_de_uso_analisis_geotecnico()
     
     print("=== INPUT ===")
     print(entrada['df'].head())
     print("\nUmbral:", entrada['umbral_nulos'])
     
-    print("\n=== OUTPUT ESPERADO ===")
-    print(salida_esperada)
-    
     resultado = analizar_umbrales_geotecnicos(
         entrada['df'],
         entrada['umbral_nulos']
     )
-    
-    print("\n=== RESULTADO FUNCIÓN ===")
-    print(resultado)
     
     print("\n=== VALIDACIÓN ROBUSTA ===")
     try:
@@ -165,7 +158,7 @@ if __name__ == "__main__":
             rtol=1e-5,
             atol=1e-8
         )
-        print("✅ Resultado correcto (assert_frame_equal)")
+        print("✅ Resultado correcto en el entorno local.")
     except AssertionError as e:
-        print("❌ Resultado incorrecto")
+        print("❌ Error en la comparación:")
         print(e)
